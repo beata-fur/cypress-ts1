@@ -1,13 +1,11 @@
 name: Cypress E2E Tests
 
-on:
-  push:
-    branches: [ master, erg02 ]
-  pull_request:
+on: push
 
 jobs:
   chrome-tests:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository with Cypress tests
         uses: actions/checkout@v4
@@ -34,49 +32,16 @@ jobs:
           npx cypress run \
             --browser chrome \
             --env "login=${{ secrets.USERNAME }},password=${{ secrets.PASSWORD }}"
-      - name: Save screenshots on failure
-        uses: actions/upload-artifact@v4 
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
-
-  firefox-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository with Cypress tests
-        uses: actions/checkout@v4
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Checkout external repository (Slawek's localstack)
-        uses: actions/checkout@v4
-        with:
-          repository: "slawekradzyminski/awesome-localstack"
-          path: "awesome-localstack"
-      - name: Run Docker Compose
-        run: |
-          cd awesome-localstack
-          chmod +x run-docker-compose-ci.sh
-          ./run-docker-compose-ci.sh
-      - name: Install chrome
-        uses: browser-actions/setup-chrome@v1
-      - name: Install dependencies
-        run: npm install
-      - name: run tests on Firefox
-        run: npx cypress run --browser firefox --env "login=${{ secrets.USERNAME }},password=${{ secrets.PASSWORD }}"
-      - name: Save screenshots on failure
+      - name: Warunkowe udostępnienie screenshotów przy failu
         uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots
           path: cypress/screenshots
           if-no-files-found: ignore
-
-  edge-tests:
+  firefox-tests:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository with Cypress tests
         uses: actions/checkout@v4
@@ -94,13 +59,52 @@ jobs:
           cd awesome-localstack
           chmod +x run-docker-compose-ci.sh
           ./run-docker-compose-ci.sh
-      - name: Install chrome
-        uses: browser-actions/setup-chrome@v1
+      - name: Install firefox
+        uses: browser-actions/setup-firefox@v1
       - name: Install dependencies
         run: npm install
-      - name: run tests on edge
-        run: npx cypress run --browser edge --env "login=${{ secrets.USERNAME }},password=${{ secrets.PASSWORD }}"
-      - name: Save screenshots on failure
+      - name: Run tests
+        run: |
+          npx cypress run \
+            --browser firefox \
+            --env "login=${{ secrets.USERNAME }},password=${{ secrets.PASSWORD }}"
+      - name: Warunkowe udostępnienie screenshotów przy failu
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+  edge-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository with Cypress tests
+        uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Checkout external repository (Slawek's localstack)
+        uses: actions/checkout@v4
+        with:
+          repository: "slawekradzyminski/awesome-localstack"
+          path: "awesome-localstack"
+      - name: Run Docker Compose
+        run: |
+          cd awesome-localstack
+          chmod +x run-docker-compose-ci.sh
+          ./run-docker-compose-ci.sh
+      - name: Install Microsoft Edge
+        run: curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft-archive-keyring.gpg && sudo mv microsoft-archive-keyring.gpg /usr/share/keyrings/ && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge-stable.list && sudo apt update && sudo apt install -y microsoft-edge-stable
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: |
+          npx cypress run \
+            --browser edge \
+            --env "login=${{ secrets.USERNAME }},password=${{ secrets.PASSWORD }}"
+      - name: Warunkowe udostępnienie screenshotów przy failu
         uses: actions/upload-artifact@v4
         if: failure()
         with:
