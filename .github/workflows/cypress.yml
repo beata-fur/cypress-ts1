@@ -34,6 +34,8 @@ jobs:
           npx cypress run \
             --browser chrome \
             --env "login=${{ secrets.USERNAME }},password=${{ secrets.PASSWORD }}"
+      - name: run tests on Firefox
+        run: npx cypress run --browser firefox --env "login=${{ secrets.USERNAME }},password=${{ secrets.PASSWORD }}"
       - name: Save screenshots on failure
         uses: actions/upload-artifact@v4 
         if: failure()
